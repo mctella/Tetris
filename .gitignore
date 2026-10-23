@@ -1,0 +1,13 @@
+bin/
+obj/
+*.exe
+*.o
+*.a
+*.lib
+*.dll
+
+*.layout
+*.depend
+*.cbp.user
+
+engine_debug.log
