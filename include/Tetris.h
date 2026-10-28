@@ -18,15 +18,50 @@ namespace TetrisConst{
         {0x0C60, 0x4C80, 0xC600, 0x2640}    // Z
     };
 
-    inline constexpr uint8_t blockTile[8][8] = {
-        {192, 192, 192, 192, 192, 192, 192, 192},
-        {192, 160, 160, 160, 160, 160, 96, 64},
-        {192, 160, 128, 128, 128, 128, 96, 64},
-        {192, 160, 128, 128, 128, 128, 96, 64},
-        {192, 160, 128, 128, 128, 128, 96, 64},
-        {192, 160, 128, 128, 128, 128, 96, 64},
-        {192, 96, 96, 96, 96, 96, 96, 64},
-        {64, 64, 64, 64, 64, 64, 64, 64}
+    inline constexpr uint8_t blockTile[2][8][8] = {
+        {
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0}
+        },
+        {
+            {192, 192, 192, 192, 192, 192, 192, 192},
+            {192, 160, 160, 160, 160, 160, 96, 64},
+            {192, 160, 128, 128, 128, 128, 96, 64},
+            {192, 160, 128, 128, 128, 128, 96, 64},
+            {192, 160, 128, 128, 128, 128, 96, 64},
+            {192, 160, 128, 128, 128, 128, 96, 64},
+            {192, 96, 96, 96, 96, 96, 96, 64},
+            {64, 64, 64, 64, 64, 64, 64, 64}
+        }
+    };
+
+    inline constexpr uint8_t borderTile[2][8][8] = {
+        {
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0}
+        },
+        {
+            {192, 192, 192, 192, 192, 192, 192, 192},
+            {192, 160, 160, 160, 160, 160, 160, 160},
+            {192, 160, 128, 64, 64, 128, 160, 192},
+            {192, 160, 128, 64, 64, 128, 160, 192},
+            {192, 160, 128, 64, 64, 128, 160, 192},
+            {192, 160, 128, 64, 64, 128, 160, 192},
+            {192, 160, 160, 160, 160, 160, 160, 160},
+            {192, 192, 192, 192, 192, 192, 192, 192}
+        }
     };
 
     const Color colors[8] = {
@@ -57,7 +92,7 @@ namespace TetrisConst{
     constexpr uint8_t BOARD_WIDTH = 12;
 
     inline constexpr float DAS_DELAY = 0.25f;
-    inline constexpr float RAPID_REPEAT = 0.0f;
+    inline constexpr float RAPID_REPEAT = 0.05f;
 
     inline constexpr float SPAWN_DELAY = 0.2f;
 
@@ -126,7 +161,7 @@ class Tetris : public Game
 
         void moveRight(float timer, AudioSystem& audio);
         void moveLeft(float timer, AudioSystem& audio);
-        void moveDown(float timer);
+        void moveDown(float timer, AudioSystem& audio);
 
         void setPiece();
 
@@ -136,17 +171,17 @@ class Tetris : public Game
         void renderBoard(Renderer& renderer);
 
         bool checkCollision() const;
-        void fix();
+        void fix(AudioSystem& audio);
         void newPiece();
 
         bool checkLine(uint8_t line) const;
-        void deleteLine(uint8_t line);
+        void deleteLine(uint8_t line, AudioSystem& audio);
 
         void setDropSpeedMS();
 
         void increaseScore(uint8_t numLines);
 
-        void levelUp();
+        void levelUp(AudioSystem& audio);
 
         void fillBag();
 
@@ -210,9 +245,10 @@ class Tetris : public Game
         SoundBuffer fixSfx;
         SoundBuffer clearSfx;
         SoundBuffer tetrisSfx;
+        SoundBuffer levelupSfx;
 
         Texture blocktextures[7];
-        Texture borderTexture;
+        Texture borderTexture[3];
 
         bool isGridOn;
 
