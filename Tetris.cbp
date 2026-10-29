@@ -54,14 +54,19 @@
 			<Add library="winmm" />
 			<Add library="dxguid" />
 			<Add library="libT1tanEngine.a" />
+			<Add library="SDL2_ttf" />
 			<Add directory="C:/libs/sdl2/x86_64-w64-mingw32/lib" />
 			<Add directory="C:/Users/diego/Documents/T1tanGames/T1tanEngine/bin/Debug" />
 		</Linker>
 		<ExtraCommands>
 			<Add after="XCOPY $(#sdl2)\bin\*.dll $(TARGET_OUTPUT_DIR) /D /Y" />
 		</ExtraCommands>
+		<Unit filename="include/MainMenu.h" />
+		<Unit filename="include/PauseScene.h" />
 		<Unit filename="include/Tetris.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/MainMenu.cpp" />
+		<Unit filename="src/PauseScene.cpp" />
 		<Unit filename="src/Tetris.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

@@ -2,6 +2,8 @@
 #define TETRIS_H
 
 #include <Game.h>
+#include "PauseScene.h"
+#include "MainMenu.h"
 
 namespace TetrisConst{
     inline constexpr uint16_t SCREEN_WIDTH = 1920;
@@ -64,7 +66,7 @@ namespace TetrisConst{
         }
     };
 
-    const Color colors[8] = {
+    const Color colors[9] = {
         ColorCodes::BLACK,
         ColorCodes::CYAN,
         ColorCodes::BLUE,
@@ -72,7 +74,8 @@ namespace TetrisConst{
         ColorCodes::YELLOW,
         ColorCodes::RED,
         ColorCodes::VIOLET,
-        ColorCodes::GREEN
+        ColorCodes::GREEN,
+        ColorCodes::SILVER
     };
 
     const uint8_t FRAMES[] = {
@@ -148,6 +151,17 @@ namespace TetrisConst{
             {{ 0, 0}, {-1, 0}, {-1, 1}, { 0,-2}, {-1,-2}}  // 3 -> 0 (Right)
         }
     };
+
+    inline constexpr float TITLE_W = SCREEN_WIDTH / 2;
+    inline constexpr float TITLE_H = SCREEN_HEIGHT / 3;
+
+    inline constexpr float PAUSE_W = TITLE_W / 4;
+    inline constexpr float PAUSE_H = TITLE_H / 4;
+};
+
+enum class TetrisState {
+    Playing,
+    GameOverAnim
 };
 
 class Tetris : public Game
@@ -172,7 +186,7 @@ class Tetris : public Game
 
         bool checkCollision() const;
         void fix(AudioSystem& audio);
-        void newPiece();
+        void newPiece(AudioSystem& audio);
 
         bool checkLine(uint8_t line) const;
         void deleteLine(uint8_t line, AudioSystem& audio);
@@ -246,13 +260,18 @@ class Tetris : public Game
         SoundBuffer clearSfx;
         SoundBuffer tetrisSfx;
         SoundBuffer levelupSfx;
+        SoundBuffer gameOverSfx;
 
-        Texture blocktextures[7];
+        Texture blocktextures[8];
         Texture borderTexture[3];
 
         bool isGridOn;
 
-        void bakeTetrisSongToFile();
+        //void bakeTetrisSongToFile();
+
+        TetrisState currentState = TetrisState::Playing;
+        int animRow = TetrisConst::BOARD_HEIGHT - 2;
+        float animTimer = 0.0f;
 };
 
 #endif // TETRIS_H

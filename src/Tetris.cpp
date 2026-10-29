@@ -12,7 +12,7 @@ void Tetris::init(GameContext& context, Renderer& renderer){
     context.audio.playMusic(song);
 
     createBorderTexture(renderer);
-    for(uint8_t i = 0; i < 7; i++){
+    for(uint8_t i = 0; i < 8; i++){
         blocktextures[i] = renderer.makeTextureFromMap8(&blockTile[0][0][0], border, &colors[i+1], BOX_SIZE, BOX_SIZE, 8);
     }
 
@@ -38,6 +38,12 @@ void Tetris::init(GameContext& context, Renderer& renderer){
         {C4 * 2.0f, 0.25f}, {G4, 0.25f}, {C4 * 2.0f, 0.25f}, {E4 * 2.0f, 0.25f}, {G4 * 2.0f, 0.5f}
     };
     levelupSfx = context.audio.generateSong(levelupNotes, 70.0f, 0.5f);
+
+    std::vector<Note> gameOverNotes = {
+        {E4 * 2.0f, 0.5f}, {B4, 0.5f}, {C4 * 2.0f, 0.5f}, {D4 * 2.0f, 0.5f},
+        {C4 * 2.0f, 0.25f}, {B4, 0.25f}, {A4, 1.0f}, {0.0f, 0.5f}
+    };
+    gameOverSfx = context.audio.generateSong(gameOverNotes, 70.0f, 0.5f);
 
     boardRect = {
         (SCREEN_WIDTH/2) - (BOX_SIZE*5),
@@ -75,71 +81,95 @@ void Tetris::init(GameContext& context, Renderer& renderer){
     fillBag();
     pieceType = bag.at(bagIndex++);
     nextPieceType = bag.at(bagIndex++);
-    newPiece();
+    newPiece(context.audio);
+
+    currentState = TetrisState::Playing;
 }
 
 void Tetris::update(float deltaTime, GameContext& context){
-    if(spawnDelayTimer > 0.0f){
-        spawnDelayTimer -= deltaTime;
-        return;
-    }
+    switch(currentState){
+        case TetrisState::Playing:
+            if(spawnDelayTimer > 0.0f){
+                spawnDelayTimer -= deltaTime;
+                return;
+            }
 
-    if(context.input.wasKeyPressed(Key::Q)){
-        rotateSRS(false, context.audio);
-    }
-    if(context.input.wasKeyPressed(Key::W)){
-        while(!checkCollision()){
-            r++;
-        }
-        r--;
-        fix(context.audio);
-    }
-    if(context.input.wasKeyPressed(Key::E)){
-        rotateSRS(true, context.audio);
-    }
-    if(context.input.wasKeyPressed(Key::D)){
-        moveRight(DAS_DELAY, context.audio);
-    }else if(context.input.isKeyDown(Key::D)){
-        dasTimer[2] -= deltaTime;
-        if(dasTimer[2] <= 0.0f){
-            moveRight(RAPID_REPEAT, context.audio);
-        }
-    }
-    if(context.input.wasKeyPressed(Key::S)){
-        moveDown(DAS_DELAY, context.audio);
-        gravityTimer = currGravitySpeed;
-    }else if(context.input.isKeyDown(Key::S)){
-        dasTimer[1] -= deltaTime;
-        if(dasTimer[1] <= 0.0f){
-            moveDown(RAPID_REPEAT, context.audio);
-            gravityTimer = currGravitySpeed;
-        }
-    }
-    if(context.input.wasKeyPressed(Key::A)){
-        moveLeft(DAS_DELAY, context.audio);
-    }else if(context.input.isKeyDown(Key::A)){
-        dasTimer[0] -= deltaTime;
-        if(dasTimer[0] <= 0.0f){
-            moveLeft(RAPID_REPEAT, context.audio);
-        }
-    }
-    if(context.input.wasKeyPressed(Key::G)){
-        isGridOn = (isGridOn) ? false : true;
-    }
-    if(context.input.isKeyDown(Key::Escape)){
-        context.input.setQuit(true);
-    }
-    if(context.input.wasKeyPressed(Key::LeftArr)){
-        rotateSRS(false, context.audio);
-    }
-    if(context.input.wasKeyPressed(Key::RightArr)){
-        rotateSRS(true, context.audio);
-    }
+            if(context.input.wasKeyPressed(Key::Q)){
+                rotateSRS(false, context.audio);
+            }
+            if(context.input.wasKeyPressed(Key::W)){
+                while(!checkCollision()){
+                    r++;
+                }
+                r--;
+                fix(context.audio);
+            }
+            if(context.input.wasKeyPressed(Key::E)){
+                rotateSRS(true, context.audio);
+            }
+            if(context.input.wasKeyPressed(Key::D)){
+                moveRight(DAS_DELAY, context.audio);
+            }else if(context.input.isKeyDown(Key::D)){
+                dasTimer[2] -= deltaTime;
+                if(dasTimer[2] <= 0.0f){
+                    moveRight(RAPID_REPEAT, context.audio);
+                }
+            }
+            if(context.input.wasKeyPressed(Key::S)){
+                moveDown(DAS_DELAY, context.audio);
+                gravityTimer = currGravitySpeed;
+            }else if(context.input.isKeyDown(Key::S)){
+                dasTimer[1] -= deltaTime;
+                if(dasTimer[1] <= 0.0f){
+                    moveDown(RAPID_REPEAT, context.audio);
+                    gravityTimer = currGravitySpeed;
+                }
+            }
+            if(context.input.wasKeyPressed(Key::A)){
+                moveLeft(DAS_DELAY, context.audio);
+            }else if(context.input.isKeyDown(Key::A)){
+                dasTimer[0] -= deltaTime;
+                if(dasTimer[0] <= 0.0f){
+                    moveLeft(RAPID_REPEAT, context.audio);
+                }
+            }
+            if(context.input.wasKeyPressed(Key::G)){
+                isGridOn = (isGridOn) ? false : true;
+            }
+            if(context.input.wasKeyPressed(Key::P)){
+                context.scenes.pushScene(std::make_unique<PauseScene>());
+            }
+            if(context.input.wasKeyPressed(Key::Escape)){
+                context.scenes.changeScene(std::make_unique<MainMenu>());
+            }
+            if(context.input.wasKeyPressed(Key::LeftArr)){
+                rotateSRS(false, context.audio);
+            }
+            if(context.input.wasKeyPressed(Key::RightArr)){
+                rotateSRS(true, context.audio);
+            }
 
-    gravityTimer -= deltaTime;
-    if(gravityTimer <= 0.0f){
-        moveDown(0.0f, context.audio);
-        gravityTimer = currGravitySpeed;
+            gravityTimer -= deltaTime;
+            if(gravityTimer <= 0.0f){
+                moveDown(0.0f, context.audio);
+                gravityTimer = currGravitySpeed;
+            }
+            break;
+        case TetrisState::GameOverAnim:
+            animTimer -= deltaTime;
+            if(animTimer <= 0.0f){
+                for(uint8_t col = 1; col < BOARD_WIDTH - 1; col++){
+                    if(board[animRow][col] > 0){
+                        board[animRow][col] = 8;
+                    }
+                }
+                animRow--;
+                animTimer = 0.2f;
+                if(animRow < -2){
+                    context.scenes.pushScene(std::make_unique<MainMenu>());
+                }
+            }
+            break;
     }
 }
 
@@ -284,6 +314,9 @@ void Tetris::createBorderTexture(Renderer& renderer){
         borderTexture[i] = renderer.createRenderTarget(w, SCREEN_HEIGHT);
         renderer.setRenderTarget(&borderTexture[i]);
 
+        renderer.setColor(0, 0, 0, 0);
+        renderer.clear();
+
         renderer.setColor(cols[i]);
         renderer.drawRect({0, 0, PADDING, SCREEN_HEIGHT}, true);            // LEFT
         renderer.drawRect({0, 0, w, PADDING}, true);                        // TOP
@@ -400,7 +433,7 @@ void Tetris::fix(AudioSystem& audio){
         audio.playSfx(fixSfx);
     }
 
-    newPiece();
+    newPiece(audio);
 }
 
 bool Tetris::checkLine(uint8_t line) const{
@@ -422,7 +455,7 @@ void Tetris::deleteLine(uint8_t line, AudioSystem& audio){
     }
 }
 
-void Tetris::newPiece(){
+void Tetris::newPiece(AudioSystem& audio){
     spawnDelayTimer = SPAWN_DELAY;
     dasTimer[1] = DAS_DELAY;
 
@@ -441,7 +474,9 @@ void Tetris::newPiece(){
     setPiece();
 
     if(checkCollision()){
-        exit(EXIT_FAILURE);
+        currentState = TetrisState::GameOverAnim;
+        audio.stopMusic();
+        audio.playSfx(gameOverSfx);
     }
 }
 
