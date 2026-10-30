@@ -1,6 +1,6 @@
 #include "Tetris.h"
 
-#include <fstream>
+//#include <fstream>
 #include <ios>
 
 using namespace TetrisConst;
@@ -136,16 +136,10 @@ void Tetris::update(float deltaTime, GameContext& context){
             if(context.input.wasKeyPressed(Key::G)){
                 isGridOn = (isGridOn) ? false : true;
             }
-            if(context.input.wasKeyPressed(Key::P)){
-                context.scenes.pushScene(std::make_unique<PauseScene>());
-            }
-            if(context.input.wasKeyPressed(Key::Escape)){
-                context.scenes.changeScene(std::make_unique<MainMenu>());
-            }
-            if(context.input.wasKeyPressed(Key::LeftArr)){
+            if(context.input.wasKeyPressed(Key::Left)){
                 rotateSRS(false, context.audio);
             }
-            if(context.input.wasKeyPressed(Key::RightArr)){
+            if(context.input.wasKeyPressed(Key::Right)){
                 rotateSRS(true, context.audio);
             }
 
@@ -170,6 +164,12 @@ void Tetris::update(float deltaTime, GameContext& context){
                 }
             }
             break;
+    }
+    if(context.input.wasKeyPressed(Key::P)){
+        context.scenes.pushScene(std::make_unique<PauseScene>());
+    }
+    if(context.input.wasKeyPressed(Key::Escape)){
+        context.scenes.changeScene(std::make_unique<MainMenu>());
     }
 }
 
@@ -266,45 +266,6 @@ void Tetris::rotateSRS(bool clockwise, AudioSystem& audio){
     currRot = oldRot;
     setPiece();
 }
-
-/*
-Texture Tetris::createBlockTexture(Renderer& renderer, uint8_t rot){
-
-    Texture blockTex = renderer.createRenderTarget(BOX_SIZE, BOX_SIZE);
-    renderer.setRenderTarget(&blockTex);
-
-    renderer.setColor(colors[rot]);
-    renderer.drawRect({0, 0, BOX_SIZE, BOX_SIZE}, 1);
-
-    uint8_t prevShade = 0;
-    Rect pixel = {
-        0,
-        0,
-        border,
-        border
-    };
-
-    for(uint8_t i = 0; i < 8; i++){
-        for(uint8_t j = 0; j < 8; j++){
-            if(blockTile[i][j] != 128){
-                if(blockTile[i][j] != prevShade){
-                    renderer.setColor(calculateShade(colors[rot], blockTile[i][j]));
-                    prevShade = blockTile[i][j];
-                }
-                renderer.drawRect(pixel, true);
-            }
-            pixel.x += border;
-        }
-        pixel.x = 0;
-        pixel.y += border;
-    }
-
-    // Reset rendering back to the main screen
-    renderer.setRenderTarget(nullptr);
-    return blockTex;
-
-}*/
-
 
 void Tetris::createBorderTexture(Renderer& renderer){
     Color cols[3] = { ColorCodes::BRONZE, ColorCodes::SILVER, ColorCodes::GOLD };

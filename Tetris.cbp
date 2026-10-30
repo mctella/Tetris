@@ -32,20 +32,27 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-Os" />
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-static-libstdc++" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Os" />
 			<Add option="-Wall" />
+			<Add option="-ffunction-sections" />
+			<Add option="-fdata-sections" />
 			<Add directory="C:/libs/sdl2/x86_64-w64-mingw32/include" />
 			<Add directory="C:/Users/diego/Documents/T1tanGames/T1tanEngine/include" />
 		</Compiler>
 		<Linker>
+			<Add option="-s" />
+			<Add option="-static-libstdc++" />
+			<Add option="-Wl,--gc-sections" />
 			<Add library="mingw32" />
 			<Add library="SDL2main" />
 			<Add library="SDL2.dll" />

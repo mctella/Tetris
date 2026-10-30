@@ -94,8 +94,8 @@ namespace TetrisConst{
     constexpr uint8_t BOARD_HEIGHT = 22;
     constexpr uint8_t BOARD_WIDTH = 12;
 
-    inline constexpr float DAS_DELAY = 0.25f;
-    inline constexpr float RAPID_REPEAT = 0.05f;
+    inline constexpr float DAS_DELAY = 0.15f;
+    inline constexpr float RAPID_REPEAT = 0.03f;
 
     inline constexpr float SPAWN_DELAY = 0.2f;
 
